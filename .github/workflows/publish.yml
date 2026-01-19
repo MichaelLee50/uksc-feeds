@@ -6,12 +6,17 @@ on:
   schedule:
     - cron: "17 6 * * *"   # daily at 06:17 UTC
 
+permissions:
+  contents: write          # <-- allow commits from the workflow
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true   # <-- keep GITHUB_TOKEN for git push
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -29,7 +34,7 @@ jobs:
       - name: Commit updated feeds
         run: |
           git config user.name "uksc-feeds-bot"
-          git config user.email "uksc-feeds-bot@users.noreply.github.com"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
           git add *.xml
           git commit -m "Update feeds [skip ci]" || echo "No changes"
           git push
